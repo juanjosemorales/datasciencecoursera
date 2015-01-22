@@ -8,7 +8,7 @@
 * UCI HAR Dataset directory
 
 The idea is to run the run_analysis.R script from the directory that contains the UCI HAR Dataset directory.
-The run_analysis.R script will return an R data.frame() which, if written down as a txt file, will look like the tidy_data_set.txt 
+The run_analysis.R script will return an R data.frame() which, if written down as a txt file, will look like the tidy_data_set.txt.
 The CodeBook.md file has more information about the resulting data set.
 
 ##Example Usage
