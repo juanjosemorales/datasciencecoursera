@@ -12,6 +12,9 @@ The run_analysis.R script will return an R data.frame() which, if written down a
 The CodeBook.md file has more information about the resulting data set.
 
 ##Example Usage
+
 setwd("THIS_DIRECTORY")
+
 source("run_analysis.R")
+
 table.write(run_analysis(), file="tidy_data_set.txt")
