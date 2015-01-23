@@ -18,11 +18,9 @@ These signals were used to estimate variables of the feature vector for each pat
 The activity and subject variables were added to the data set. 
 
 ##Variable Data Types:
-"activity" is a string vector denoting the activities
-
-"subject" is a numeric vector identifying the subject performing the activity
-
-all the other variables are numeric vectors showing the averaged mean and standard deviation measurements that were originally taken in the experiment. See above for detailed information about these measurements.
+* "activity" is a string vector denoting the activities
+* "subject" is a numeric vector identifying the subject performing the activity
+* all the other variables are numeric vectors showing the averaged mean and standard deviation measurements that were originally taken in the experiment. See above for detailed information about these measurements.
 
 ##List of Variables in the Dataset
 * "activity"
