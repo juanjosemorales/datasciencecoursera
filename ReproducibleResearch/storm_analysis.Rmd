@@ -1,0 +1,140 @@
+---
+title: "Severe Weather Effects on Public Health and the Economy"
+author: "Juan Jose"
+date: "Tuesday, February 17, 2015"
+output: html_document
+---
+
+
+# Data Processing
+
+#### This section explains how the data is loaded into R and any transformations that were done to the raw data in order to perform the analysis.
+*Note we assume you have downloaded the file and unzipped it to 'repdata-data-StormData.csv' and that you are executing this R script in the directory where the file is located.*
+
+First the data is loaded and any additional libraries.
+```{r libs}
+
+library(dplyr)
+library(ggplot2)
+
+```
+
+```{r loading, cache=TRUE}
+storm.data <- read.csv('repdata-data-StormData.csv', strip.white=TRUE)
+names(storm.data)
+
+```
+
+Not all of the entries in the EVTYPE column are of the same case, so they need to be all capitalized in order to increase accuracy. 
+```{r}
+storm.data$EVTYPE <- toupper(storm.data$EVTYPE)
+
+```
+
+The data set provides variables that can be used to answer the question of how weather events affect public health.
+* FATALITIES
+* INJURIES
+We can subset the data to only get the instances where there were injuries and fatalities as a result of extreme weather events.
+```{r}
+#make a new data frame for this analysis
+health <- data.frame(storm.data$EVTYPE, storm.data$INJURIES, storm.data$FATALITIES)
+
+#subset the new data frame to get injuries and fatalities
+names(health) <- c("event", "injuries", "fatalities")
+health <- subset(health, injuries > 0 | fatalities > 0)
+
+health <- health %>% group_by(event) %>% summarise_each(funs(sum))
+injuries <- data.frame(health$event, health$injuries)
+names(injuries) <- c("event", "count")
+fatalities <- data.frame(health$event, health$fatalities)
+names(fatalities) <- c("event", "count")
+
+fatalities <- head(fatalities[order(fatalities$count, decreasing=TRUE), ], 10)
+injuries   <- head(injuries[order(injuries$count, decreasing=TRUE), ], 10)
+
+```
+
+The data set provides four variables that can be used to answer the question of how weather events affect the economy.
+* PROPDMG
+* PROPDMGEXP
+* CROPDMG
+* CROPDMGEXP
+First, we create a new data frame for the economic analysis using these variables.
+```{r}
+econ <- data.frame(storm.data$EVTYPE, storm.data$PROPDMG, storm.data$PROPDMGEXP, storm.data$CROPDMG, storm.data$CROPDMGEXP)
+#change the names to facilitate usage
+names(econ) <- c("event", "prop.dmg", "prop.exp", "crop.dmg", "crop.exp")
+
+```
+The two columns with the exp in the name are what we need to multiply by in order to get the real damange.
+
+```{r}
+unique(econ$crop.exp)
+unique(econ$prop.exp)
+```
+We need to do some transformations to these data in order to use them.
+
+```{r cache=TRUE}
+#convert all entries to the same case
+econ$crop.exp <- toupper(econ$crop.exp)
+econ$prop.exp <- toupper(econ$prop.exp)
+
+#convert the letters into numbers
+#make a function to use in sapply to conver every entry into a number
+convert.fun <- function(entry) {
+        
+        if      (entry == 'H')
+                ret = 100
+        else if (entry == 'K')
+                ret = 1000
+        else if (entry == 'M')
+                ret = 1000000
+        else if (entry == 'B')
+                ret = 1000000000
+        else
+                ret = 1
+        return (ret)
+}
+
+econ$prop.exp <- sapply(econ$prop.exp, FUN=convert.fun)
+econ$crop.exp <- sapply(econ$crop.exp, FUN=convert.fun)
+
+#now use the exponents to get the property damage
+econ$prop.dmg <- econ$prop.dmg * econ$prop.exp
+econ$crop.dmg <- econ$crop.dmg * econ$crop.exp
+
+#get the total damage for properties and crops
+tot.prop <- data.frame(econ$event, econ$prop.dmg)
+names(tot.prop) = c("event", "amount")
+tot.crop <- data.frame(econ$event, econ$crop.dmg)
+names(tot.crop) = c("event", "amount")
+
+#combine property and crop damage
+tot.dmg = rbind(tot.prop, tot.crop)
+
+#aggregate it by events and then get the top 10 records
+tot.dmg = aggregate(tot.dmg$amount, by=list(tot.dmg$event), FUN=sum)
+names(tot.dmg) = c("event", "amount")
+tot.dmg = head(tot.dmg[order(tot.dmg$amount, decreasing=TRUE), ] , 10)
+
+```
+Now we have three data frames with the data needed to answer the questions.
+
+# Results
+
+## Effects of Weather on Public Health
+
+INJURIES
+```{r}
+qplot(x=reorder(event, count), y=count, data=injuries, geom=c("bar"), stat="identity", xlab="Event", ylab="Injuries", main="Injuries Caused by Weather Events from 1950-2011 in the USA", fill=count) + coord_flip()
+```
+
+FATALITIES
+```{r}
+qplot(x=reorder(event, count), y=count, data=fatalities, geom=c("bar"), stat="identity", xlab="Event", ylab="Fatalities", main="Fatalities Caused by Weather Events from 1950-2011 in the USA", fill=count) + coord_flip()
+```
+
+## Effects of weather on the Economy
+```{r}
+qplot(x=reorder(event, amount), y=amount, data=tot.dmg, geom=c("bar"), stat="identity", xlab="Event", ylab="Amount in USD", main="Total Damange Caused By Weather Events from 1950-2011 in the USA", fill=amount) + coord_flip()
+```
