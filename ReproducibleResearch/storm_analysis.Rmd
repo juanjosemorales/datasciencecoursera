@@ -1,15 +1,19 @@
 ---
-title: "Severe Weather Effects on Public Health and the Economy"
+title: "Effects of Severe Weather on Public Health and the Economy"
 author: "Juan Jose"
 date: "Tuesday, February 17, 2015"
 output: html_document
 ---
 
+# Synopsis
+Severe weather greatly affects both public health and the economy. Many severe events can result in fatalities, injuries, and property damage, and we should try to prevent these to the extent possible. It is important to know what type of events are the most harmful to both health and the economy so that we can mitigate and even prevent damages.
+
+This artile analyses data from the U.S National Oceanic and Atmospheric Adminstration's (NOAA) storm database. The data tracks characteristics and consequences of major weather events in the United States from 1950 to 2011. From the data, we can say that Floods have had the biggest economic impact in the country. Tornados have caused the most injuries and fatalities. 
 
 # Data Processing
 
 #### This section explains how the data is loaded into R and any transformations that were done to the raw data in order to perform the analysis.
-*Note we assume you have downloaded the file and unzipped it to 'repdata-data-StormData.csv' and that you are executing this R script in the directory where the file is located.*
+*Note: This code assumes you have downloaded the file and unzipped it to 'repdata-data-StormData.csv' and that you are executing this R script in the directory where the file is located.*
 
 First the data is loaded and any additional libraries.
 ```{r libs}
@@ -31,9 +35,7 @@ storm.data$EVTYPE <- toupper(storm.data$EVTYPE)
 
 ```
 
-The data set provides variables that can be used to answer the question of how weather events affect public health.
-* FATALITIES
-* INJURIES
+The data set provides variables that can be used to answer the question of how weather events affect public health FATALITIES and INJURIES.
 We can subset the data to only get the instances where there were injuries and fatalities as a result of extreme weather events.
 ```{r}
 #make a new data frame for this analysis
@@ -54,11 +56,7 @@ injuries   <- head(injuries[order(injuries$count, decreasing=TRUE), ], 10)
 
 ```
 
-The data set provides four variables that can be used to answer the question of how weather events affect the economy.
-* PROPDMG
-* PROPDMGEXP
-* CROPDMG
-* CROPDMGEXP
+The data set provides four variables that can be used to answer the question of how weather events affect the economy PROPDMG, PROPDMGEXP, CROPDMG, and CROPDMGEXP.
 First, we create a new data frame for the economic analysis using these variables.
 ```{r}
 econ <- data.frame(storm.data$EVTYPE, storm.data$PROPDMG, storm.data$PROPDMGEXP, storm.data$CROPDMG, storm.data$CROPDMGEXP)
@@ -124,17 +122,19 @@ Now we have three data frames with the data needed to answer the questions.
 
 ## Effects of Weather on Public Health
 
-INJURIES
+#### INJURIES - Tornados have caused the most injuries in the US from 1950 to 2011.
 ```{r}
 qplot(x=reorder(event, count), y=count, data=injuries, geom=c("bar"), stat="identity", xlab="Event", ylab="Injuries", main="Injuries Caused by Weather Events from 1950-2011 in the USA", fill=count) + coord_flip()
 ```
 
-FATALITIES
+#### FATALITIES - Tornados have caused the most fatalities in the US from 1950 to 2011.
 ```{r}
 qplot(x=reorder(event, count), y=count, data=fatalities, geom=c("bar"), stat="identity", xlab="Event", ylab="Fatalities", main="Fatalities Caused by Weather Events from 1950-2011 in the USA", fill=count) + coord_flip()
 ```
 
 ## Effects of weather on the Economy
+
+#### Floods have caused the most property and crop damage in the US from 1950 to 2011.
 ```{r}
 qplot(x=reorder(event, amount), y=amount, data=tot.dmg, geom=c("bar"), stat="identity", xlab="Event", ylab="Amount in USD", main="Total Damange Caused By Weather Events from 1950-2011 in the USA", fill=amount) + coord_flip()
 ```
