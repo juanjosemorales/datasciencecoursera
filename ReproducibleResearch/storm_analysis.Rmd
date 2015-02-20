@@ -13,7 +13,7 @@ This artile analyses data from the U.S National Oceanic and Atmospheric Adminstr
 # Data Processing
 
 #### This section explains how the data is loaded into R and any transformations that were done to the raw data in order to perform the analysis.
-*Note: This code assumes you have downloaded the file and unzipped it to 'repdata-data-StormData.csv' and that you are executing this R script in the directory where the file is located.*
+*Note: This code assumes you have downloaded the file and that you are executing this R script in the directory where the file is located.*
 
 First the data is loaded and any additional libraries.
 ```{r libs}
@@ -24,7 +24,7 @@ library(ggplot2)
 ```
 
 ```{r loading, cache=TRUE}
-storm.data <- read.csv('repdata-data-StormData.csv', strip.white=TRUE)
+storm.data <- read.csv(bzfile("repdata-data-StormData.csv.bz2"), strip.white=TRUE)
 names(storm.data)
 
 ```
