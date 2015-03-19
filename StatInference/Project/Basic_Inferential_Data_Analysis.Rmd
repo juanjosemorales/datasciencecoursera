@@ -1,0 +1,105 @@
+---
+title: "Inferential Data Analysis on the ToothGrowth R Dataset"
+author: "Juan Jose"
+date: "Tuesday, March 17, 2015"
+output: word_document
+---
+
+```{r}
+#Load any necessary datasets
+library(datasets)
+
+library(ggplot2)
+
+#Store the ToothGrowth data frame into a variable, t, in case we do any transformations
+t = ToothGrowth
+```
+
+## Exploratory Data Analysis
+
+First we'll get a feel for what is in the ToothGrowth data frame.
+```{r}
+head(t)
+```
+
+```{r}
+summary(t)
+```
+
+```{r}
+unique(t$dose)
+```
+```{r}
+unique(t$supp)
+```
+
+We'll combine the dose and supp factors together and plot that against the length to get a better understanding of what is going on with the data. 
+
+```{r}
+t$supplement.dose = interaction(t$supp, t$dose)
+
+q = qplot(x=supplement.dose, y=len, data=t, geom="boxplot", fill=supplement.dose, main="Boxplot of ToothGrowth Data", ylab="Length", xlab="Supplement and Dose")
+
+print(q)
+```
+
+## Basic Summary Of the Data
+
+From the resulting boxplot, we can tell that the the length of a tooth increases as the dosage of each supplement increases. 
+It also appears to be the case that for dosages of 0.5 and 1, OJ causes teeth to be longer than VC, while for dosages of 2, there is no difference between the two supplements.
+
+## Comparison of Tooth Growth by Supplement
+```{r}
+supp.VC = t[which(t$supp=="VC"), 1]
+supp.OJ = t[which(t$supp=="OJ"), 1]
+
+var(supp.OJ)
+var(supp.VC)
+
+```
+Because the variances are different, and the two groups are statistically indpendent we can call t.test with paired=F and var.equal=FALSE
+
+
+```{r}
+supp.t.test = t.test(supp.OJ, supp.VC, paired=FALSE, var.equal=FALSE)
+supp.t.test
+```
+
+
+## Comparison of Tooth Growth by Dose
+
+```{r}
+lowDose = t[which(t$dose==0.5), 1]
+medDose = t[which(t$dose==1), 1]
+highDose = t[which(t$dose==2), 1]
+
+```
+
+#### Test 1 vs 0.5
+
+```{r}
+t.test(medDose, lowDose, paired=FALSE, var.equal=FALSE)
+```
+
+#### Test 2 vs 1
+
+```{r}
+t.test(highDose, medDose, paired=FALSE, var.equal=FALSE)
+```
+
+#### Test 2 vs 0.5
+
+```{r}
+t.test(highDose, lowDose, paired=FALSE, var.equal=FALSE)
+```
+
+# Conclusions and Assumptions
+Based on the following assumptions:
+- The t.tests on the dosage samples assume that the variances are different
+- The are no confounding variables on the data
+- The data are randomly selected and provide a representation of the entire population
+
+Then we can conclude that:
+- The supplement type does not affect the tooth length
+- Dosage types do affect the tooth length, namely, the higher a dose, the larger the tooth length
+
